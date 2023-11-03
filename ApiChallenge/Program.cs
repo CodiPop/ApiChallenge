@@ -10,7 +10,10 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("AppConnection")));
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
-builder.Services.AddScoped< ProductoService>();
+builder.Services.AddScoped<ProductoService>();
+builder.Services.AddScoped<ITiposProductosRepository, TiposProductosRepository>();
+builder.Services.AddScoped<TiposProductosService>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

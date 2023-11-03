@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ApiChallenge.DBContext;
 using ApiChallenge.Models;
+using ApiChallenge.Services;
 
 namespace ApiChallenge.Controllers
 {
@@ -14,40 +15,40 @@ namespace ApiChallenge.Controllers
     [ApiController]
     public class TiposProductosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly TiposProductosService _service;
 
-        public TiposProductosController(AppDbContext context)
+        public TiposProductosController(TiposProductosService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: api/TiposProductos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TiposProducto>>> GetTiposProductos()
+        public async Task<ActionResult<TiposProducto>> GetTiposProductos()
         {
-          if (_context.TiposProductos == null)
-          {
-              return NotFound();
-          }
-            return await _context.TiposProductos.ToListAsync();
+            var productos = await _service.GetProductosAsync();
+            if (productos == null)
+            {
+                return NotFound();
+            }
+
+
+            return Ok(productos);
         }
 
         // GET: api/TiposProductos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TiposProducto>> GetTiposProducto(int id)
         {
-          if (_context.TiposProductos == null)
-          {
-              return NotFound();
-          }
-            var tiposProducto = await _context.TiposProductos.FindAsync(id);
 
-            if (tiposProducto == null)
+            var producto = await _service.GetProductoByIdAsync(id);
+
+            if (producto == null)
             {
                 return NotFound();
             }
 
-            return tiposProducto;
+            return Ok(producto);
         }
 
         // PUT: api/TiposProductos/5
@@ -57,28 +58,25 @@ namespace ApiChallenge.Controllers
         {
             if (id != tiposProducto.TipoProductoId)
             {
-                return BadRequest();
+                return BadRequest("El ID del producto en la URL no coincide con el ID del producto en el cuerpo de la solicitud.");
             }
 
-            _context.Entry(tiposProducto).State = EntityState.Modified;
+            var currentProduct = await _service.GetProductoByIdAsync(id);
+
+            if (currentProduct == null)
+            {
+                return NotFound();
+            }
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _service.UpdateProductoAsync(id, currentProduct, tiposProducto);
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TiposProductoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return Conflict("Se produjo un conflicto al intentar actualizar el producto. Puede que los datos hayan cambiado desde la última vez que se obtuvieron.");
             }
-
-            return NoContent();
         }
 
         // POST: api/TiposProductos
@@ -86,39 +84,29 @@ namespace ApiChallenge.Controllers
         [HttpPost]
         public async Task<ActionResult<TiposProducto>> PostTiposProducto(TiposProducto tiposProducto)
         {
-          if (_context.TiposProductos == null)
-          {
-              return Problem("Entity set 'AppDbContext.TiposProductos'  is null.");
-          }
-            _context.TiposProductos.Add(tiposProducto);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetTiposProducto", new { id = tiposProducto.TipoProductoId }, tiposProducto);
+            var newProducto = await _service.CreateProductoAsync(tiposProducto);
+            if (newProducto == null)
+            {
+                return NotFound();
+            }
+            return Ok(newProducto);
         }
 
         // DELETE: api/TiposProductos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTiposProducto(int id)
         {
-            if (_context.TiposProductos == null)
+            var producto = await _service.GetProductoByIdAsync(id);
+
+            if (producto == null)
             {
                 return NotFound();
             }
-            var tiposProducto = await _context.TiposProductos.FindAsync(id);
-            if (tiposProducto == null)
-            {
-                return NotFound();
-            }
 
-            _context.TiposProductos.Remove(tiposProducto);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            await _service.DeleteProductoAsync(id);
+            return Ok(); ;
         }
 
-        private bool TiposProductoExists(int id)
-        {
-            return (_context.TiposProductos?.Any(e => e.TipoProductoId == id)).GetValueOrDefault();
-        }
+
     }
 }

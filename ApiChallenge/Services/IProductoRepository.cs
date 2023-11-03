@@ -11,7 +11,6 @@ namespace ApiChallenge.Services
         Task UpdateProductoAsync(Producto producto);
         Task DeleteProductoAsync(int id);
        
-
   
     }
 
