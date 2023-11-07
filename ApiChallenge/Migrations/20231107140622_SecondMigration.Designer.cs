@@ -4,6 +4,7 @@ using ApiChallenge.DBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiChallenge.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231107140622_SecondMigration")]
+    partial class SecondMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,16 +37,13 @@ namespace ApiChallenge.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("EstadoProducto")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime?>("FechaCompra")
-                        .IsRequired()
                         .HasColumnType("date");
 
                     b.Property<int?>("TipoProductoId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Valor")

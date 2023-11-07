@@ -11,6 +11,7 @@ namespace ApiChallenge.Models
     {
         [Key]
         public int TipoProductoId { get; set; }
+        [Required]
         [StringLength(50)]
         public string? Nombre { get; set; }
     }
